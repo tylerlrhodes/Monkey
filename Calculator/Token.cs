@@ -13,6 +13,8 @@ namespace Calculator
 
     public const string INT = "INT";
 
+    public const string OR = "||";
+    public const string AND = "&&";
     public const string PLUS = "+";
     public const string MINUS = "-";
     public const string ASTERISK = "*";
@@ -27,6 +29,11 @@ namespace Calculator
   {
     public string Type { get; set; }
     public string Literal { get; set; }
+
+    public override string ToString()
+    {
+      return $"{Type} - {Literal}";
+    }
   }
 
 }

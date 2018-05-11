@@ -40,7 +40,7 @@ namespace Calculator
       string str = "";
       foreach (var statement in Statements)
       {
-        str += statement.ToString();
+        str += statement.ToString() + "\n";
       }
       return str;
     }

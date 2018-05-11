@@ -2,11 +2,24 @@
 
 namespace Calculator
 {
-    class Program
+  class Program
+  {
+    static void Main(string[] args)
     {
-        static void Main(string[] args)
-        {
-            Console.WriteLine("Hello World!");
-        }
+      Console.WriteLine("Calculator 1.0");
+
+      while (true)
+      {
+        Console.Write(">>");
+        var expr = Console.ReadLine();
+
+        Lexer lexer = new Lexer(expr);
+        Parser parser = new Parser(lexer);
+
+        Code code = parser.ParseCode();
+
+        Console.WriteLine(code);
+      }
     }
+  }
 }

@@ -10,7 +10,7 @@ namespace CalculatorTests
     [Fact]
     public void Test1()
     {
-      const string input = "4 + 3 - 2 * 5 / 10 + (2 + 3)^3";
+      const string input = "4 + 3 - 2 * 5 / 10 + (2 + 3)^3 || 1 && 2";
 
       List<Token> expected = new List<Token>
       {
@@ -101,6 +101,26 @@ namespace CalculatorTests
         },
         new Token()
         {
+          Type = TokenType.OR,
+          Literal = "||"
+        },
+        new Token()
+        {
+          Type = TokenType.INT,
+          Literal = "1"
+        },
+        new Token()
+        {
+          Type = TokenType.AND,
+          Literal = "&&"
+        },
+        new Token()
+        {
+          Type = TokenType.INT,
+          Literal = "2"
+        },
+        new Token()
+        {
           Type = TokenType.EOF,
           Literal = ""
         }
@@ -112,6 +132,7 @@ namespace CalculatorTests
       {
         var curToken = lexer.NextToken();
 
+        Console.WriteLine(curToken.ToString() + " " + t.ToString());
         Assert.Equal(t, curToken);
       }
     }

@@ -6,32 +6,34 @@ using System.Text;
 
 namespace Calculator
 {
-  public enum Precedence
+  public enum BindingPower
   {
-    LOWEST = 0,
-    SUM,
-    PRODUCT,
-    POWER,
-    PREFIX
+    LOWEST = 10,
+    OR = 20,
+    AND = 30,
+    SUM = 40,
+    PRODUCT = 50,
+    POWER = 60,
+    PREFIX = 70
   }
 
   interface IInfixParslet
   {
     IExpression Parse(Parser parser, IExpression left, Token token);
-    Precedence GetPrecedence();
+    BindingPower GetBindingPower();
   }
 
   class InfixOperatorParslet : IInfixParslet
   {
-    private Precedence _precedence;
+    private BindingPower _bindingPower;
 
-    public Precedence GetPrecedence() => _precedence;
+    public BindingPower GetBindingPower() => _bindingPower;
 
     private bool _isRight;
 
-    public InfixOperatorParslet(Precedence precedence, bool isRight)
+    public InfixOperatorParslet(BindingPower bindingPower, bool isRight)
     {
-      _precedence = precedence;
+      _bindingPower = bindingPower;
       _isRight = isRight;
     }
 
@@ -46,7 +48,7 @@ namespace Calculator
 
       parser.NextToken();
 
-      expression.right = parser.ParseExpression(_precedence - (_isRight ? 1 : 0));
+      expression.right = parser.ParseExpression(_bindingPower - (_isRight ? 1 : 0));
 
       return expression;
     }
@@ -75,7 +77,7 @@ namespace Calculator
     {
       parser.NextToken();
 
-      IExpression operand = parser.ParseExpression(Precedence.PREFIX);
+      IExpression operand = parser.ParseExpression(BindingPower.PREFIX);
 
       return new PrefixExpression()
       {
@@ -103,11 +105,14 @@ namespace Calculator
       RegisterPrefix(TokenType.INT, new IntegerParslet());
       RegisterPrefix(TokenType.MINUS, new PrefixOperatorParslet());
 
-      RegisterInfix(TokenType.CARROT, new InfixOperatorParslet(Precedence.POWER, true));
-      RegisterInfix(TokenType.MINUS, new InfixOperatorParslet(Precedence.SUM, false));
-      RegisterInfix(TokenType.PLUS, new InfixOperatorParslet(Precedence.SUM, false));
-      RegisterInfix(TokenType.ASTERISK, new InfixOperatorParslet(Precedence.PRODUCT, false));
-      RegisterInfix(TokenType.FSLASH, new InfixOperatorParslet(Precedence.SUM, false));
+      RegisterInfix(TokenType.OR, new InfixOperatorParslet(BindingPower.OR, true));
+      RegisterInfix(TokenType.AND, new InfixOperatorParslet(BindingPower.AND, true));
+
+      RegisterInfix(TokenType.CARROT, new InfixOperatorParslet(BindingPower.POWER, true));
+      RegisterInfix(TokenType.MINUS, new InfixOperatorParslet(BindingPower.SUM, false));
+      RegisterInfix(TokenType.PLUS, new InfixOperatorParslet(BindingPower.SUM, false));
+      RegisterInfix(TokenType.ASTERISK, new InfixOperatorParslet(BindingPower.PRODUCT, false));
+      RegisterInfix(TokenType.FSLASH, new InfixOperatorParslet(BindingPower.SUM, false));
 
       NextToken();
       NextToken();
@@ -123,7 +128,7 @@ namespace Calculator
       _prefixParslets.Add(tokenType, parslet);
     }
 
-    public IExpression ParseExpression(Precedence precedence)
+    public IExpression ParseExpression(BindingPower bindingPower)
     {
       var prefixParslet = _prefixParslets[_curToken.Type];
       if (prefixParslet == null)
@@ -134,7 +139,7 @@ namespace Calculator
 
       var leftexp = prefixParslet.Parse(this, _curToken);
 
-      while (!PeekTokenIs(TokenType.EOF) && precedence < PeekPrecedence())
+      while (!PeekTokenIs(TokenType.EOF) && bindingPower < PeekBindingPower())
       {
         var infixParslet = _infixParslets[_peekToken.Type];
         if (infixParslet == null)
@@ -150,10 +155,12 @@ namespace Calculator
       return leftexp;
     }
 
-    private Precedence PeekPrecedence()
+    private BindingPower PeekBindingPower()
     {
+      if (!_infixParslets.ContainsKey(_peekToken.Type)) return BindingPower.LOWEST;
+
       IInfixParslet parslet = _infixParslets[_peekToken.Type];
-      return parslet.GetPrecedence();
+      return parslet.GetBindingPower();
     }
 
     public Code ParseCode()
@@ -180,7 +187,7 @@ namespace Calculator
     {
       var stmt = new ExpressionStatement();
       stmt.token = _curToken;
-      stmt.Expression = ParseExpression(Precedence.LOWEST);
+      stmt.Expression = ParseExpression(BindingPower.LOWEST);
 
       return stmt;
     }

@@ -27,6 +27,28 @@ namespace Calculator
 
       switch (_ch)
       {
+        case '|':
+          if (PeekChar() == '|')
+          {
+            ReadChar();
+            token = NewToken(TokenType.OR, "||");
+          }
+          else
+          {
+            SetInvalidToken(token);
+          }
+          break;
+        case '&':
+          if (PeekChar() == '&')
+          {
+            ReadChar();
+            token = NewToken(TokenType.AND, "&&");
+          }
+          else
+          {
+            SetInvalidToken(token);
+          }
+          break;
         case '+':
           token = NewToken(TokenType.PLUS, _ch.ToString());
           break;
@@ -61,8 +83,7 @@ namespace Calculator
           }
           else
           {
-            token.Type = TokenType.ILLEGAL;
-            token.Literal = _ch.ToString();
+            SetInvalidToken(token);
           }
           break;
       }
@@ -70,6 +91,12 @@ namespace Calculator
       ReadChar();
 
       return token;
+    }
+
+    private void SetInvalidToken(Token token)
+    {
+      token.Type = TokenType.ILLEGAL;
+      token.Literal = _ch.ToString();
     }
 
     private void ReadChar()

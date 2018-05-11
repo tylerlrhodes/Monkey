@@ -63,5 +63,20 @@ namespace CalculatorTests
 
       Assert.Equal("((-(-(-42))) + (42 * (10 ^ (3 ^ 4))))", code.Statements[0].ToString());
     }
+
+    [Fact]
+    public void TestPrefix5()
+    {
+      Lexer lexer = new Lexer(@"2 + 4
+10");
+
+      Parser parser = new Parser(lexer);
+
+      var code = parser.ParseCode();
+
+      System.Console.WriteLine(code);
+
+      Assert.Equal("(2 + 4)\n10\n", code.ToString());
+    }
   }
 }
