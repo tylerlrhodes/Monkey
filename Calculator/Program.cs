@@ -4,6 +4,11 @@ namespace Calculator
 {
   class Program
   {
+    enum Test
+    {
+      NumOne
+    }
+
     static void Main(string[] args)
     {
       Console.WriteLine("Calculator 1.0");

@@ -128,7 +128,7 @@ namespace Calculator
 
     public override string ToString()
     {
-      return "(" + left.ToString() + " " + op + " " + right.ToString() + ")";
+      return "(" + left?.ToString() + " " + op + " " + right?.ToString() + ")";
     }
 
     public void ExpressionNode()

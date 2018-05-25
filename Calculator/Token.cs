@@ -6,28 +6,28 @@ using System.Text;
 
 namespace Calculator
 {
-  public struct TokenType
+  public enum TokenType
   {
-    public const string ILLEGAL = "Illegal";
-    public const string EOF = "EOF";
+    ILLEGAL,
+    EOF,
 
-    public const string INT = "INT";
+    INT,
 
-    public const string OR = "||";
-    public const string AND = "&&";
-    public const string PLUS = "+";
-    public const string MINUS = "-";
-    public const string ASTERISK = "*";
-    public const string FSLASH = "/";
-    public const string CARROT = "^";
+    OR,
+    AND,
+    PLUS,
+    MINUS,
+    ASTERISK,
+    FSLASH,
+    CARROT,
 
-    public const string LPAREN = "(";
-    public const string RPAREN = ")";
+    LPAREN,
+    RPAREN
   }
 
   public struct Token
   {
-    public string Type { get; set; }
+    public TokenType Type { get; set; }
     public string Literal { get; set; }
 
     public override string ToString()

@@ -90,8 +90,8 @@ namespace Calculator
 
   public class Parser
   {
-    private readonly Dictionary<string, IPrefixParslet> _prefixParslets = new Dictionary<string, IPrefixParslet>();
-    private readonly Dictionary<string, IInfixParslet> _infixParslets = new Dictionary<string, IInfixParslet>();
+    private readonly Dictionary<TokenType, IPrefixParslet> _prefixParslets = new Dictionary<TokenType, IPrefixParslet>();
+    private readonly Dictionary<TokenType, IInfixParslet> _infixParslets = new Dictionary<TokenType, IInfixParslet>();
     private Token _curToken;
     private Token _peekToken;
 
@@ -104,6 +104,7 @@ namespace Calculator
 
       RegisterPrefix(TokenType.INT, new IntegerParslet());
       RegisterPrefix(TokenType.MINUS, new PrefixOperatorParslet());
+      RegisterPrefix(TokenType.EOF, null);
 
       RegisterInfix(TokenType.OR, new InfixOperatorParslet(BindingPower.OR, true));
       RegisterInfix(TokenType.AND, new InfixOperatorParslet(BindingPower.AND, true));
@@ -118,12 +119,12 @@ namespace Calculator
       NextToken();
     }
 
-    private void RegisterInfix(string tokenType, IInfixParslet parslet)
+    private void RegisterInfix(TokenType tokenType, IInfixParslet parslet)
     {
       _infixParslets.Add(tokenType, parslet);
     }
 
-    private void RegisterPrefix(string tokenType, IPrefixParslet parslet)
+    private void RegisterPrefix(TokenType tokenType, IPrefixParslet parslet)
     {
       _prefixParslets.Add(tokenType, parslet);
     }
@@ -198,17 +199,17 @@ namespace Calculator
       _peekToken = _lexer.NextToken();
     }
 
-    private bool CurTokenIs(string tokenType)
+    private bool CurTokenIs(TokenType tokenType)
     {
       return _curToken.Type == tokenType;
     }
 
-    private bool PeekTokenIs(string tokenType)
+    private bool PeekTokenIs(TokenType tokenType)
     {
       return _peekToken.Type == tokenType;
     }
 
-    public bool ExpectPeek(string tokenType)
+    public bool ExpectPeek(TokenType tokenType)
     {
       if (PeekTokenIs(tokenType))
       {
@@ -222,7 +223,7 @@ namespace Calculator
       }
     }
 
-    private void PeekError(string tokenType)
+    private void PeekError(TokenType tokenType)
     {
       _errors.Add($"Expected next token to be {tokenType} but got {_peekToken.Type} instead.");
     }

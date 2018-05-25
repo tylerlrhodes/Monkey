@@ -142,7 +142,7 @@ namespace Calculator
       return _input.Substring(position, _position - position);
     }
 
-    private Token NewToken(string tokenType, string literal)
+    private Token NewToken(TokenType tokenType, string literal)
     {
       return new Token
       {
