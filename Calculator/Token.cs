@@ -13,8 +13,12 @@ namespace Calculator
 
     INT,
 
+    EQ,
     OR,
     AND,
+    LT,
+    GT,
+
     PLUS,
     MINUS,
     ASTERISK,

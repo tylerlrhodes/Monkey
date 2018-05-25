@@ -49,6 +49,23 @@ namespace Calculator
             SetInvalidToken(token);
           }
           break;
+        case '=':
+          if (PeekChar() == '=')
+          {
+            ReadChar();
+            token = NewToken(TokenType.EQ, "==");
+          }
+          else
+          {
+            SetInvalidToken(token);
+          }
+          break;
+        case '<':
+          token = NewToken(TokenType.LT, _ch.ToString());
+          break;
+        case '>':
+          token = NewToken(TokenType.GT, _ch.ToString());
+          break;
         case '+':
           token = NewToken(TokenType.PLUS, _ch.ToString());
           break;

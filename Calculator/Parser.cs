@@ -9,12 +9,15 @@ namespace Calculator
   public enum BindingPower
   {
     LOWEST = 10,
+    EQUALS,
     OR = 20,
     AND = 30,
+    COMPARISON = 35,
     SUM = 40,
     PRODUCT = 50,
     POWER = 60,
-    PREFIX = 70
+    PREFIX = 70,
+    CALL
   }
 
   interface IInfixParslet
@@ -96,7 +99,18 @@ namespace Calculator
     private Token _peekToken;
 
     private Lexer _lexer;
+
+    public List<string> Errors
+    {
+      get { return _errors; }
+    }
+
     private List<string> _errors = new List<string>();
+
+    public bool HasError
+    {
+      get { return _errors.Count > 0 ? true : false; }
+    }
 
     public Parser(Lexer lexer)
     {
@@ -105,10 +119,13 @@ namespace Calculator
       RegisterPrefix(TokenType.INT, new IntegerParslet());
       RegisterPrefix(TokenType.MINUS, new PrefixOperatorParslet());
       RegisterPrefix(TokenType.EOF, null);
-
+      RegisterPrefix(TokenType.LPAREN, new GroupedOperatorParslet());
       RegisterInfix(TokenType.OR, new InfixOperatorParslet(BindingPower.OR, true));
       RegisterInfix(TokenType.AND, new InfixOperatorParslet(BindingPower.AND, true));
 
+      RegisterInfix(TokenType.EQ, new InfixOperatorParslet(BindingPower.EQUALS, false));
+      RegisterInfix(TokenType.LT, new InfixOperatorParslet(BindingPower.COMPARISON, false));
+      RegisterInfix(TokenType.GT, new InfixOperatorParslet(BindingPower.COMPARISON, false));
       RegisterInfix(TokenType.CARROT, new InfixOperatorParslet(BindingPower.POWER, true));
       RegisterInfix(TokenType.MINUS, new InfixOperatorParslet(BindingPower.SUM, false));
       RegisterInfix(TokenType.PLUS, new InfixOperatorParslet(BindingPower.SUM, false));
@@ -129,12 +146,21 @@ namespace Calculator
       _prefixParslets.Add(tokenType, parslet);
     }
 
+    private IPrefixParslet GetPrefixParslet(TokenType type)
+    {
+      if (_prefixParslets.ContainsKey(type))
+        return _prefixParslets[type];
+
+      return null;
+    }
+
     public IExpression ParseExpression(BindingPower bindingPower)
     {
-      var prefixParslet = _prefixParslets[_curToken.Type];
+      var prefixParslet = GetPrefixParslet(_curToken.Type);
       if (prefixParslet == null)
       {
-        // add error logging
+        _errors.Add($"No Prefix Parslet for {_curToken.Type}");
+
         return null;
       }
 
@@ -142,7 +168,7 @@ namespace Calculator
 
       while (!PeekTokenIs(TokenType.EOF) && bindingPower < PeekBindingPower())
       {
-        var infixParslet = _infixParslets[_peekToken.Type];
+        var infixParslet = GetInfixParslet(_peekToken.Type);
         if (infixParslet == null)
         {
           return leftexp;
@@ -154,6 +180,14 @@ namespace Calculator
       }
 
       return leftexp;
+    }
+
+    private IInfixParslet GetInfixParslet(TokenType peekTokenType)
+    {
+      if (_infixParslets.ContainsKey(peekTokenType))
+        return _infixParslets[peekTokenType];
+
+      return null;
     }
 
     private BindingPower PeekBindingPower()
@@ -226,6 +260,23 @@ namespace Calculator
     private void PeekError(TokenType tokenType)
     {
       _errors.Add($"Expected next token to be {tokenType} but got {_peekToken.Type} instead.");
+    }
+  }
+
+  public class GroupedOperatorParslet : IPrefixParslet
+  {
+    public IExpression Parse(Parser parser, Token token)
+    {
+      parser.NextToken();
+
+      var exp = parser.ParseExpression(BindingPower.LOWEST);
+
+      if (!parser.ExpectPeek(TokenType.RPAREN))
+      {
+        return null;
+      }
+
+      return exp;
     }
   }
 }

@@ -24,6 +24,21 @@ namespace Calculator
         Code code = parser.ParseCode();
 
         Console.WriteLine(code);
+
+        if (parser.HasError)
+        {
+          foreach (var err in parser.Errors)
+          {
+            Console.WriteLine(err);
+          }
+          continue;
+        }
+
+        Evaluator eval = new Evaluator();
+
+        var result = eval.Eval(code, new Environment());
+
+        Console.WriteLine($"Result = {result.Inspect()}\n");
       }
     }
   }
