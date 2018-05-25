@@ -7,8 +7,8 @@ namespace Calculator
 {
   public class Evaluator
   {
-    private Boolean TRUE = new Boolean() { Value = true };
-    private Boolean FALSE = new Boolean() { Value = false };
+    private static Boolean TRUE = new Boolean() { Value = true };
+    private static Boolean FALSE = new Boolean() { Value = false };
 
     public IObject Eval(object node, Environment env)
     {

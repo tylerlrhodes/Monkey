@@ -18,10 +18,10 @@ namespace Calculator
         Console.Write(">>");
         var expr = Console.ReadLine();
 
-        Lexer lexer = new Lexer(expr);
-        Parser parser = new Parser(lexer);
+        var lexer = new Lexer(expr);
+        var parser = new Parser(lexer);
 
-        Code code = parser.ParseCode();
+        var code = parser.ParseCode();
 
         Console.WriteLine(code);
 
@@ -34,7 +34,7 @@ namespace Calculator
           continue;
         }
 
-        Evaluator eval = new Evaluator();
+        var eval = new Evaluator();
 
         var result = eval.Eval(code, new Environment());
 
