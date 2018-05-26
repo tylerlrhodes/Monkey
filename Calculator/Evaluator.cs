@@ -26,7 +26,7 @@ namespace Calculator
           val = Eval(rs.ReturnValue, env);
           if (val is Error)
             return val;
-          return new ReturnValue() {Value = val};
+          return new ReturnValue() { Value = val };
 
         case Identifier i:
           return EvalIdentifier(i, env);
@@ -59,10 +59,13 @@ namespace Calculator
             return right;
           return EvalInfixExpression(ie.op, left, right);
 
+        case IfExpression ie:
+          return EvalIfExpression(ie, env);
+
         case FunctionLiteral fl:
           var parameters = fl.Parameters;
           var body = fl.Body;
-          return new Function() {Parameters = parameters, Body = body, Environment = env};
+          return new Function() { Parameters = parameters, Body = body, Environment = env };
 
         case CallExpression ce:
           var function = Eval(ce.Function, env);
@@ -79,6 +82,41 @@ namespace Calculator
       return null;
     }
 
+    private IObject EvalIfExpression(IfExpression ie, Environment env)
+    {
+      var condition = Eval(ie.Condition, env);
+      if (condition is Error)
+        return condition;
+
+      if (IsTruthy(condition))
+      {
+        return Eval(ie.Consequence, env);
+      }
+      else if (ie.Alternative != null)
+      {
+        return Eval(ie.Alternative, env);
+      }
+      else
+      {
+        return null;
+      }
+    }
+
+    private bool IsTruthy(IObject condition)
+    {
+      switch (condition)
+      {
+        case Boolean b:
+          return b == TRUE ? true : false;
+
+        case Integer i:
+          return i.Value == 0 ? false : true;
+
+        default:
+          return true;
+      }
+    }
+
     private Environment ExtendFunctionEnv(Function function, List<IObject> args)
     {
       var env = Environment.NewEnclosedEnvironment(function.Environment);
@@ -93,7 +131,7 @@ namespace Calculator
     {
       if (!(function is Function))
       {
-        return new Error() {Message = $"not a function {function.Type()}"};
+        return new Error() { Message = $"not a function {function.Type()}" };
       }
 
       if (args.Count != function.Parameters.Count)
@@ -148,7 +186,7 @@ namespace Calculator
     {
       var (val, ok) = env.Get(identifier.Value);
       if (!ok)
-        return new Error() {Message = $"identifier not found: {identifier.Value}"};
+        return new Error() { Message = $"identifier not found: {identifier.Value}" };
       return val;
     }
 
@@ -172,7 +210,7 @@ namespace Calculator
       }
       else
       {
-        return new Error() {Message = $"Unknown operator {left.Type()} {op} {right.Type()}"};
+        return new Error() { Message = $"Unknown operator {left.Type()} {op} {right.Type()}" };
       }
       return null;
     }
@@ -185,15 +223,15 @@ namespace Calculator
       switch (op)
       {
         case "+":
-          return new Integer() {Value = lval + rval};
+          return new Integer() { Value = lval + rval };
         case "-":
-          return new Integer() {Value = lval - rval};
+          return new Integer() { Value = lval - rval };
         case "*":
-          return new Integer() {Value = lval * rval};
+          return new Integer() { Value = lval * rval };
         case "/":
-          return new Integer() {Value = lval / rval};
+          return new Integer() { Value = lval / rval };
         case "^":
-          return new Integer() {Value = (int)Math.Pow(lval, rval)};
+          return new Integer() { Value = (int)Math.Pow(lval, rval) };
         case "<":
           return NativeBoolToBoolean(lval < rval);
         case ">":
@@ -201,7 +239,7 @@ namespace Calculator
         case "==":
           return NativeBoolToBoolean(lval == rval);
         default:
-          return new Error() {Message = $"Unknown operator {left.Type()} {op} {right.Type()}"};
+          return new Error() { Message = $"Unknown operator {left.Type()} {op} {right.Type()}" };
       }
     }
 
@@ -217,16 +255,16 @@ namespace Calculator
         case "-":
           return EvalMinusPrefixOperatorExpression(right);
         default:
-          return new Error() {Message = $"Unknown operator {op}"};
+          return new Error() { Message = $"Unknown operator {op}" };
       }
     }
 
     private IObject EvalMinusPrefixOperatorExpression(IObject right)
     {
-      if(right.Type() != ObjectType.INTEGER)
-        return new Error() {Message = $"Unknown operator -{right.Type()}"};
+      if (right.Type() != ObjectType.INTEGER)
+        return new Error() { Message = $"Unknown operator -{right.Type()}" };
 
-      return new Integer() {Value = -(right as Integer).Value};
+      return new Integer() { Value = -(right as Integer).Value };
     }
 
     private IObject EvalProgram(Code node, Environment env)

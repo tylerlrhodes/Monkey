@@ -279,6 +279,37 @@ namespace Calculator
     }
   }
 
+  public class IfExpression : IExpression
+  {
+    public Token token { get; set; }
+    public IExpression Condition { get; set; }
+    public BlockStatement Consequence { get; set; }
+    public BlockStatement Alternative { get; set; }
+
+    public string TokenLiteral()
+    {
+      return token.Literal;
+    }
+
+    public void ExpressionNode()
+    {
+      throw new NotImplementedException();
+    }
+
+    public override string ToString()
+    {
+      string str = "";
+      str += "if";
+      str += Condition.ToString();
+      str += " " + Consequence.ToString();
+
+      if (Alternative != null)
+        str += "else " + Alternative.ToString();
+
+      return str;
+    }
+  }
+
   public class Identifier : IExpression
   {
     public Token token { get; set; }

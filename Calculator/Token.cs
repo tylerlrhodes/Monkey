@@ -36,6 +36,8 @@ namespace Calculator
     LBRACE,
     RBRACE,
 
+    IF,
+    ELSE,
     FUNCTION,
     RETURN,
     COMMA
@@ -61,6 +63,10 @@ namespace Calculator
           return TokenType.RETURN;
         case "fn":
           return TokenType.FUNCTION;
+        case "if":
+          return TokenType.IF;
+        case "else":
+          return TokenType.ELSE;
         default:
           return TokenType.IDENT;
       }

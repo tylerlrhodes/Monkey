@@ -121,6 +121,7 @@ namespace Calculator
       RegisterPrefix(TokenType.LPAREN, new GroupedOperatorParslet());
       RegisterPrefix(TokenType.IDENT, new IdentifierParslet());
       RegisterPrefix(TokenType.FUNCTION, new FunctionLiteralParslet());
+      RegisterPrefix(TokenType.IF, new IfExpressionParslet());
 
       RegisterInfix(TokenType.OR, new InfixOperatorParslet(BindingPower.OR, true));
       RegisterInfix(TokenType.AND, new InfixOperatorParslet(BindingPower.AND, true));
@@ -305,6 +306,40 @@ namespace Calculator
 
     public Token CurrentToken() => _curToken;
 
+  }
+
+  public class IfExpressionParslet : IPrefixParslet
+  {
+    public IExpression Parse(Parser parser, Token token)
+    {
+      var expr = new IfExpression() {token = parser.CurrentToken()};
+
+      if (!parser.ExpectPeek(TokenType.LPAREN))
+        return null;
+
+      parser.NextToken();
+      expr.Condition = parser.ParseExpression(BindingPower.LOWEST);
+
+      if (!parser.ExpectPeek(TokenType.RPAREN))
+        return null;
+
+      if (!parser.ExpectPeek(TokenType.LBRACE))
+        return null;
+
+      expr.Consequence = new BlockStatementParslet().Parse(parser);
+
+      if (parser.PeekTokenIs(TokenType.ELSE))
+      {
+        parser.NextToken();
+
+        if (!parser.ExpectPeek(TokenType.LBRACE))
+          return null;
+
+        expr.Alternative = new BlockStatementParslet().Parse(parser);
+      }
+
+      return expr;
+    }
   }
 
   public class ParseCallExpressionParslet : IInfixParslet

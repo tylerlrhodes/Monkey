@@ -14,7 +14,15 @@ namespace Calculator
 
     public (IObject, bool) Get(string name)
     {
-      return _store.ContainsKey(name) ? (_store[name], true) : (null, false);
+      if (_store.ContainsKey(name))
+        return (_store[name], true);
+
+      if (!_store.ContainsKey(name) && _outer != null)
+      {
+        return _outer.Get(name);
+      }
+
+      return (null, false);
     }
 
     public IObject Set(string name, IObject obj)
