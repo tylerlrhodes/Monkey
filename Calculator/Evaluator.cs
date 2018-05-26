@@ -18,6 +18,16 @@ namespace Calculator
         case Code c:
           return EvalProgram(c, env);
 
+        case Identifier i:
+          return EvalIdentifier(i, env);
+
+        case LetStatement ls:
+          var val = Eval(ls.Value, env);
+          if (val is Error)
+            return val;
+          env.Set(ls.Name.Value, val);
+          break;
+
         case ExpressionStatement es:
           return Eval(es.Expression, env);
 
@@ -44,6 +54,14 @@ namespace Calculator
       return null;
     }
 
+    private IObject EvalIdentifier(Identifier identifier, Environment env)
+    {
+      var (val, ok) = env.Get(identifier.Value);
+      if (!ok)
+        return new Error() {Message = $"identifier not found: {identifier.Value}"};
+      return val;
+    }
+
     private IObject EvalInfixExpression(string op, IObject left, IObject right)
     {
       if (left.Type() == ObjectType.INTEGER && right.Type() == ObjectType.INTEGER)
@@ -57,6 +75,10 @@ namespace Calculator
       else if (op == "!=")
       {
         // todo
+      }
+      else if (left.Type() == ObjectType.BOOLEAN && right.Type() == ObjectType.BOOLEAN && op == "&&")
+      {
+        return NativeBoolToBoolean((left as Boolean).Value && (right as Boolean).Value);
       }
       else
       {

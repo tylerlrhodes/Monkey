@@ -13,6 +13,7 @@ namespace Calculator
 
     INT,
 
+    ASSIGN,
     EQ,
     OR,
     AND,
@@ -26,7 +27,11 @@ namespace Calculator
     CARROT,
 
     LPAREN,
-    RPAREN
+    RPAREN,
+
+    LET,
+
+    IDENT
   }
 
   public struct Token
@@ -37,6 +42,17 @@ namespace Calculator
     public override string ToString()
     {
       return $"{Type} - {Literal}";
+    }
+
+    public static TokenType LookupIdent(string ident)
+    {
+      switch (ident)
+      {
+        case "let":
+          return TokenType.LET;
+        default:
+          return TokenType.IDENT;
+      }
     }
   }
 

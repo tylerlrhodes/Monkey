@@ -118,8 +118,8 @@ namespace Calculator
 
       RegisterPrefix(TokenType.INT, new IntegerParslet());
       RegisterPrefix(TokenType.MINUS, new PrefixOperatorParslet());
-      RegisterPrefix(TokenType.EOF, null);
       RegisterPrefix(TokenType.LPAREN, new GroupedOperatorParslet());
+      RegisterPrefix(TokenType.IDENT, new IdentifierParslet());
       RegisterInfix(TokenType.OR, new InfixOperatorParslet(BindingPower.OR, true));
       RegisterInfix(TokenType.AND, new InfixOperatorParslet(BindingPower.AND, true));
 
@@ -215,7 +215,32 @@ namespace Calculator
 
     private IStatement ParseStatement()
     {
-      return ParseExpressionStatement();
+      switch (_curToken.Type)
+      {
+        case TokenType.LET:
+          return ParseLetStatement();
+        default:
+          return ParseExpressionStatement();
+      }
+    }
+
+    private IStatement ParseLetStatement()
+    {
+      var stmt = new LetStatement() {token = _curToken};
+
+      if (!ExpectPeek(TokenType.IDENT))
+        return null;
+
+      stmt.Name = new Identifier() {token = _curToken, Value = _curToken.Literal};
+
+      if (!ExpectPeek(TokenType.ASSIGN))
+        return null;
+
+      NextToken();
+
+      stmt.Value = ParseExpression(BindingPower.LOWEST);
+
+      return stmt;
     }
 
     private ExpressionStatement ParseExpressionStatement()
@@ -260,6 +285,14 @@ namespace Calculator
     private void PeekError(TokenType tokenType)
     {
       _errors.Add($"Expected next token to be {tokenType} but got {_peekToken.Type} instead.");
+    }
+  }
+
+  public class IdentifierParslet : IPrefixParslet
+  {
+    public IExpression Parse(Parser parser, Token token)
+    {
+      return new Identifier() {token = token, Value = token.Literal };
     }
   }
 

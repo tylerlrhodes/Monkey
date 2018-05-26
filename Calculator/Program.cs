@@ -4,14 +4,10 @@ namespace Calculator
 {
   class Program
   {
-    enum Test
-    {
-      NumOne
-    }
-
     static void Main(string[] args)
     {
       Console.WriteLine("Calculator 1.0");
+      var env = new Environment();
 
       while (true)
       {
@@ -36,9 +32,9 @@ namespace Calculator
 
         var eval = new Evaluator();
 
-        var result = eval.Eval(code, new Environment());
+        var result = eval.Eval(code, env);
 
-        Console.WriteLine($"Result = {result.Inspect()}\n");
+        Console.WriteLine(result == null ? "Enter next line.." : $"Result = {result.Inspect()}");
       }
     }
   }

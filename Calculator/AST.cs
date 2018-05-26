@@ -137,5 +137,50 @@ namespace Calculator
     }
   }
 
+  public class LetStatement : IStatement
+  {
+    public Token token { get; set; }
+    public Identifier Name { get; set; }
+    public IExpression Value { get; set; }
 
+    public string TokenLiteral()
+    {
+      return token.Literal;
+    }
+
+    public void StatementNode()
+    {
+      throw new NotImplementedException();
+    }
+
+    public override string ToString()
+    {
+      var sb = new StringBuilder();
+
+      sb.Append(TokenLiteral() + " " + Name + " = " + Value?.ToString());
+
+      return sb.ToString();
+    }
+  }
+
+  public class Identifier : IExpression
+  {
+    public Token token { get; set; }
+    public string Value { get; set; }
+
+    public string TokenLiteral()
+    {
+      return token.Literal;
+    }
+
+    public void ExpressionNode()
+    {
+      throw new NotImplementedException();
+    }
+
+    public override string ToString()
+    {
+      return Value;
+    }
+  }
 }

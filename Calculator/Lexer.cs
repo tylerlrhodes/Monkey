@@ -57,7 +57,7 @@ namespace Calculator
           }
           else
           {
-            SetInvalidToken(token);
+            token = NewToken(TokenType.ASSIGN, "=");
           }
           break;
         case '<':
@@ -96,6 +96,12 @@ namespace Calculator
           {
             token.Type = TokenType.INT;
             token.Literal = ReadNumber();
+            return token;
+          }
+          else if (char.IsLetter(_ch))
+          {
+            token.Literal = ReadIdentifier();
+            token.Type = Token.LookupIdent(token.Literal);
             return token;
           }
           else
@@ -148,7 +154,12 @@ namespace Calculator
 
     private string ReadIdentifier()
     {
-      throw new NotImplementedException();
+      int position = _position;
+      while (char.IsLetter(_ch))
+      {
+        ReadChar();
+      }
+      return _input.Substring(position, _position - position);
     }
 
     private string ReadNumber()
