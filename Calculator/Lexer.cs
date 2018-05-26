@@ -60,6 +60,15 @@ namespace Calculator
             token = NewToken(TokenType.ASSIGN, "=");
           }
           break;
+        case '{':
+          token = NewToken(TokenType.LBRACE, _ch.ToString());
+          break;
+        case '}':
+          token = NewToken(TokenType.RBRACE, _ch.ToString());
+          break;
+        case ',':
+          token = NewToken(TokenType.COMMA, _ch.ToString());
+          break;
         case '<':
           token = NewToken(TokenType.LT, _ch.ToString());
           break;

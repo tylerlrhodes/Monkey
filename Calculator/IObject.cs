@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
 // ReSharper disable InconsistentNaming
 
 namespace Calculator
@@ -10,13 +11,39 @@ namespace Calculator
     INTEGER,
     BOOLEAN,
     ERROR,
-    RETURNVALUE
+    RETURNVALUE,
+    FUNCTION
   }
 
   public interface IObject
   {
     ObjectType Type();
     string Inspect();
+  }
+
+  public class Function : IObject
+  {
+    public List<Identifier> Parameters { get; set; }
+    public BlockStatement Body { get; set; }
+    public Environment Environment { get; set; }
+
+    public ObjectType Type()
+    {
+      return ObjectType.FUNCTION;
+    }
+
+    public string Inspect()
+    {
+      string str = "";
+
+      str += "fn(";
+      str += string.Join(",", from param in Parameters select param.TokenLiteral());
+      str += ") {\n";
+      str += Body.ToString();
+      str += "\n}";
+
+      return str;
+    }
   }
 
   public class ReturnValue : IObject

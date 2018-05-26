@@ -22,7 +22,7 @@ namespace Calculator
 
   interface IInfixParslet
   {
-    IExpression Parse(Parser parser, IExpression left, Token token);
+    IExpression Parse(Parser parser, IExpression function, Token token);
     BindingPower GetBindingPower();
   }
 
@@ -40,13 +40,13 @@ namespace Calculator
       _isRight = isRight;
     }
 
-    public IExpression Parse(Parser parser, IExpression left, Token tok)
+    public IExpression Parse(Parser parser, IExpression function, Token tok)
     {
       var expression = new InfixExpression()
       {
         token = tok,
         op = tok.Literal,
-        left = left
+        left = function
       };
 
       parser.NextToken();
@@ -120,6 +120,8 @@ namespace Calculator
       RegisterPrefix(TokenType.MINUS, new PrefixOperatorParslet());
       RegisterPrefix(TokenType.LPAREN, new GroupedOperatorParslet());
       RegisterPrefix(TokenType.IDENT, new IdentifierParslet());
+      RegisterPrefix(TokenType.FUNCTION, new FunctionLiteralParslet());
+
       RegisterInfix(TokenType.OR, new InfixOperatorParslet(BindingPower.OR, true));
       RegisterInfix(TokenType.AND, new InfixOperatorParslet(BindingPower.AND, true));
 
@@ -131,6 +133,7 @@ namespace Calculator
       RegisterInfix(TokenType.PLUS, new InfixOperatorParslet(BindingPower.SUM, false));
       RegisterInfix(TokenType.ASTERISK, new InfixOperatorParslet(BindingPower.PRODUCT, false));
       RegisterInfix(TokenType.FSLASH, new InfixOperatorParslet(BindingPower.SUM, false));
+      RegisterInfix(TokenType.LPAREN, new ParseCallExpressionParslet(BindingPower.CALL, false));
 
       NextToken();
       NextToken();
@@ -213,12 +216,14 @@ namespace Calculator
       return code;
     }
 
-    private IStatement ParseStatement()
+    public IStatement ParseStatement()
     {
       switch (_curToken.Type)
       {
         case TokenType.LET:
           return ParseLetStatement();
+        case TokenType.RETURN:
+          return ParseReturnStatement();
         default:
           return ParseExpressionStatement();
       }
@@ -252,6 +257,17 @@ namespace Calculator
       return stmt;
     }
 
+    private ReturnStatement ParseReturnStatement()
+    {
+      var stmt = new ReturnStatement() {token = _curToken};
+
+      NextToken();
+
+      stmt.ReturnValue = ParseExpression(BindingPower.LOWEST);
+
+      return stmt;
+    }
+
     public void NextToken()
     {
       _curToken = _peekToken;
@@ -263,7 +279,7 @@ namespace Calculator
       return _curToken.Type == tokenType;
     }
 
-    private bool PeekTokenIs(TokenType tokenType)
+    public bool PeekTokenIs(TokenType tokenType)
     {
       return _peekToken.Type == tokenType;
     }
@@ -285,6 +301,127 @@ namespace Calculator
     private void PeekError(TokenType tokenType)
     {
       _errors.Add($"Expected next token to be {tokenType} but got {_peekToken.Type} instead.");
+    }
+
+    public Token CurrentToken() => _curToken;
+
+  }
+
+  public class ParseCallExpressionParslet : IInfixParslet
+  {
+    private BindingPower _bindingPower;
+
+    public BindingPower GetBindingPower() => _bindingPower;
+
+    private bool _isRight;
+
+    public ParseCallExpressionParslet(BindingPower bp, bool isRight)
+    {
+      _bindingPower = bp;
+      _isRight = isRight;
+    }
+
+    public IExpression Parse(Parser parser, IExpression function, Token token)
+    {
+      var exp = new CallExpression() {token = token, Function = function};
+      exp.Arguments = ParseCallArguments(parser);
+      return exp;
+    }
+
+    private List<IExpression> ParseCallArguments(Parser parser)
+    {
+      var args = new List<IExpression>();
+
+      if (parser.PeekTokenIs(TokenType.RPAREN))
+      {
+        parser.NextToken();
+        return args;
+      }
+
+      parser.NextToken();
+
+      args.Add(parser.ParseExpression(BindingPower.LOWEST));
+
+      while (parser.PeekTokenIs(TokenType.COMMA))
+      {
+        parser.NextToken();
+        parser.NextToken();
+        args.Add(parser.ParseExpression(BindingPower.LOWEST));
+      }
+
+      if (!parser.ExpectPeek(TokenType.RPAREN))
+        return null;
+
+      return args;
+    }
+  }
+
+  public class FunctionLiteralParslet : IPrefixParslet
+  {
+    public IExpression Parse(Parser parser, Token token)
+    {
+      var literal = new FunctionLiteral() {token = token};
+
+      if (!parser.ExpectPeek(TokenType.LPAREN))
+        return null;
+
+      literal.Parameters = ParseFunctionParameters(parser);
+
+      if (!parser.ExpectPeek(TokenType.LBRACE))
+        return null;
+
+      literal.Body = new BlockStatementParslet().Parse(parser);
+
+      return literal;
+    }
+
+    private List<Identifier> ParseFunctionParameters(Parser parser)
+    {
+      var identifiers = new List<Identifier>();
+
+      if (parser.PeekTokenIs(TokenType.RPAREN))
+      {
+        parser.NextToken();
+        return identifiers;
+      }
+
+      parser.NextToken();
+
+      var ident = new Identifier() {token = parser.CurrentToken(), Value = parser.CurrentToken().Literal};
+      identifiers.Add(ident);
+
+      while (parser.PeekTokenIs(TokenType.COMMA))
+      {
+        parser.NextToken();
+        parser.NextToken();
+        ident = new Identifier() { token = parser.CurrentToken(), Value = parser.CurrentToken().Literal };
+        identifiers.Add(ident);
+      }
+
+      if (!parser.ExpectPeek(TokenType.RPAREN))
+        return null;
+
+      return identifiers;
+    }
+  }
+
+  public class BlockStatementParslet
+  {
+    public BlockStatement Parse(Parser parser)
+    {
+      var block = new BlockStatement() {token = parser.CurrentToken(), Statements = new List<IStatement>()};
+
+      parser.NextToken();
+
+      while (parser.CurrentToken().Type != TokenType.RBRACE && parser.CurrentToken().Type != TokenType.EOF)
+      {
+        var stmt = parser.ParseStatement();
+        if (stmt != null)
+          block.Statements.Add(stmt);
+        parser.NextToken();
+      }
+
+      return block;
     }
   }
 

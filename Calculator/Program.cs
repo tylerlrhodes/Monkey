@@ -13,8 +13,15 @@ namespace Calculator
       {
         Console.Write(">>");
         var expr = Console.ReadLine();
+        var text = "";
 
-        var lexer = new Lexer(expr);
+        while (expr != ":end")
+        {
+          text += expr;
+          expr = Console.ReadLine();
+        }
+
+        var lexer = new Lexer(text);
         var parser = new Parser(lexer);
 
         var code = parser.ParseCode();

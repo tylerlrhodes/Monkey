@@ -31,7 +31,14 @@ namespace Calculator
 
     LET,
 
-    IDENT
+    IDENT,
+
+    LBRACE,
+    RBRACE,
+
+    FUNCTION,
+    RETURN,
+    COMMA
   }
 
   public struct Token
@@ -50,6 +57,10 @@ namespace Calculator
       {
         case "let":
           return TokenType.LET;
+        case "return":
+          return TokenType.RETURN;
+        case "fn":
+          return TokenType.FUNCTION;
         default:
           return TokenType.IDENT;
       }

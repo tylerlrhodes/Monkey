@@ -10,19 +10,29 @@ namespace Calculator
     private static Boolean TRUE = new Boolean() { Value = true };
     private static Boolean FALSE = new Boolean() { Value = false };
 
-    public IObject Eval(object node, Environment env)
+    public IObject Eval(INode node, Environment env)
     {
       IObject right;
+      IObject val;
       switch (node)
       {
         case Code c:
           return EvalProgram(c, env);
 
+        case BlockStatement bs:
+          return EvalBlockStatement(bs, env);
+
+        case ReturnStatement rs:
+          val = Eval(rs.ReturnValue, env);
+          if (val is Error)
+            return val;
+          return new ReturnValue() {Value = val};
+
         case Identifier i:
           return EvalIdentifier(i, env);
 
         case LetStatement ls:
-          var val = Eval(ls.Value, env);
+          val = Eval(ls.Value, env);
           if (val is Error)
             return val;
           env.Set(ls.Name.Value, val);
@@ -49,9 +59,89 @@ namespace Calculator
             return right;
           return EvalInfixExpression(ie.op, left, right);
 
+        case FunctionLiteral fl:
+          var parameters = fl.Parameters;
+          var body = fl.Body;
+          return new Function() {Parameters = parameters, Body = body, Environment = env};
+
+        case CallExpression ce:
+          var function = Eval(ce.Function, env);
+          if (function is Error)
+            return function;
+          var args = EvalExpressions(ce.Arguments, env);
+          if (args.Count == 1 && args[0] is Error)
+          {
+            return args[0];
+          }
+          return ApplyFunction(function as Function, args);
       }
 
       return null;
+    }
+
+    private Environment ExtendFunctionEnv(Function function, List<IObject> args)
+    {
+      var env = Environment.NewEnclosedEnvironment(function.Environment);
+      for (int i = 0; i < function.Parameters.Count; i++)
+      {
+        env.Set(function.Parameters[i].Value, args[i]);
+      }
+      return env;
+    }
+
+    private IObject ApplyFunction(Function function, List<IObject> args)
+    {
+      if (!(function is Function))
+      {
+        return new Error() {Message = $"not a function {function.Type()}"};
+      }
+
+      if (args.Count != function.Parameters.Count)
+        return new Error() { Message = "Invalid argument count." };
+
+      var extendedEnv = ExtendFunctionEnv(function, args);
+      var evaluated = Eval(function.Body, extendedEnv);
+
+      return UnwrapReturnValue(evaluated);
+
+    }
+
+    private IObject UnwrapReturnValue(IObject evaluated)
+    {
+      if (evaluated is ReturnValue)
+        return (evaluated as ReturnValue).Value;
+
+      return evaluated;
+    }
+
+    private List<IObject> EvalExpressions(List<IExpression> arguments, Environment env)
+    {
+      var result = new List<IObject>();
+      foreach (var arg in arguments)
+      {
+        var evaluated = Eval(arg, env);
+        if (evaluated is Error)
+        {
+          return new List<IObject>() { evaluated };
+        }
+        result.Add(evaluated);
+      }
+      return result;
+    }
+
+    private IObject EvalBlockStatement(BlockStatement bs, Environment env)
+    {
+      IObject result = null;
+      foreach (var stmt in bs.Statements)
+      {
+        result = Eval(stmt, env);
+        if (result != null)
+        {
+          if (result is ReturnValue || result is Error)
+            return result;
+        }
+      }
+      return result;
     }
 
     private IObject EvalIdentifier(Identifier identifier, Environment env)

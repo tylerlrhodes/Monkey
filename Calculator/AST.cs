@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 // ReSharper disable InconsistentNaming
 
@@ -134,6 +136,120 @@ namespace Calculator
     public void ExpressionNode()
     {
       throw new NotImplementedException();
+    }
+  }
+
+  public class FunctionLiteral : IExpression
+  {
+    public Token token { get; set; }
+    public List<Identifier> Parameters { get; set; } = new List<Identifier>();
+    public BlockStatement Body { get; set; }
+
+    public string TokenLiteral()
+    {
+      return token.Literal;
+    }
+
+    public void ExpressionNode()
+    {
+      throw new NotImplementedException();
+    }
+
+    public override string ToString()
+    {
+      string str = "";
+      str += token.Literal;
+
+      var parameters = from p in Parameters
+        select p.Value;
+
+      str += "(";
+      str += string.Join(",", parameters);
+      str += ")";
+
+      str += Body.ToString();
+
+      return str;
+    }
+  }
+
+  public class CallExpression : IExpression
+  {
+    public Token token { get; set; }
+    public IExpression Function { get; set; }
+    public List<IExpression> Arguments { get; set; }
+
+    public string TokenLiteral()
+    {
+      return token.Literal;
+    }
+
+    public void ExpressionNode()
+    {
+      throw new NotImplementedException();
+    }
+
+    public override string ToString()
+    {
+      string str = "";
+
+      str += Function.ToString();
+      str += "(";
+
+      var args = from arg in Arguments select arg.ToString();
+
+      str += String.Join(",", args);
+
+      str += ")";
+
+      return str;
+    }
+  }
+
+  public class BlockStatement : IStatement
+  {
+    public Token token { get; set; }
+    public List<IStatement> Statements { get; set; } = new List<IStatement>();
+
+    public string TokenLiteral()
+    {
+      return token.Literal;
+    }
+
+    public void StatementNode()
+    {
+      throw new NotImplementedException();
+    }
+
+    public override string ToString()
+    {
+      string str = "";
+      foreach (var statement in Statements)
+      {
+        str += statement.ToString() + "\n";
+      }
+      return str;
+    }
+  }
+
+  public class ReturnStatement : IStatement
+  {
+    public Token token { get; set; }
+    public IExpression ReturnValue { get; set; }
+
+    public string TokenLiteral()
+    {
+      return token.Literal;
+    }
+
+    public void StatementNode()
+    {
+      throw new NotImplementedException();
+    }
+
+    public override string ToString()
+    {
+      return $"{token.Literal} {ReturnValue}";
     }
   }
 
