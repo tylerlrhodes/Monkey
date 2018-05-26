@@ -74,7 +74,7 @@ namespace Calculator
   public class IntegerLiteral : IExpression
   {
     public Token token { get; set; }
-    public int Value { get; set; }
+    public long Value { get; set; }
 
     public string TokenLiteral()
     {

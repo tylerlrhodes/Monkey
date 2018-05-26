@@ -63,7 +63,7 @@ namespace Calculator
 
   public class Integer : IObject
   {
-    public int Value { get; set; }
+    public long Value { get; set; }
 
     public ObjectType Type()
     {

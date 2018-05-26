@@ -231,7 +231,7 @@ namespace Calculator
         case "/":
           return new Integer() { Value = lval / rval };
         case "^":
-          return new Integer() { Value = (int)Math.Pow(lval, rval) };
+          return new Integer() { Value = (long)Math.Pow(lval, rval) };
         case "<":
           return NativeBoolToBoolean(lval < rval);
         case ">":
@@ -281,6 +281,9 @@ namespace Calculator
             break;
           case Boolean b:
             result = b;
+            break;
+          case ReturnValue rv:
+            result = rv;
             break;
           case Error e:
             result = e;
