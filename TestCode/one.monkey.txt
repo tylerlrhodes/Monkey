@@ -10,7 +10,9 @@ let test = fn(x) {
   return test (x)
 }
 
+test(a)
+
 let f = fn() { return 1 }
 
-return test(a)
+test(a)
 
