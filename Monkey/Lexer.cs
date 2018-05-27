@@ -60,6 +60,10 @@ namespace Monkey
             token = NewToken(TokenType.ASSIGN, "=");
           }
           break;
+        case '"':
+          ReadChar();
+          token = NewStringToken();
+          break;
         case '{':
           token = NewToken(TokenType.LBRACE, _ch.ToString());
           break;
@@ -121,6 +125,20 @@ namespace Monkey
       }
 
       ReadChar();
+
+      return token;
+    }
+
+    private Token NewStringToken()
+    {
+      var token = new Token() {Type = TokenType.STRING};
+
+      var position = _position;
+
+      while(_ch != '"')
+        ReadChar();
+
+      token.Literal = _input.Substring(position, _position - position);
 
       return token;
     }

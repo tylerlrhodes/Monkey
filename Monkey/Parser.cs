@@ -62,6 +62,18 @@ namespace Monkey
     IExpression Parse(Parser parser, Token token);
   }
 
+  class StringParslet : IPrefixParslet
+  {
+    public IExpression Parse(Parser parser, Token token)
+    {
+      return new StringLiteral()
+      {
+        token = token,
+        Value = token.Literal
+      };
+    }
+  }
+
   class IntegerParslet : IPrefixParslet
   {
     public IExpression Parse(Parser parser, Token token)
@@ -122,6 +134,7 @@ namespace Monkey
       RegisterPrefix(TokenType.IDENT, new IdentifierParslet());
       RegisterPrefix(TokenType.FUNCTION, new FunctionLiteralParslet());
       RegisterPrefix(TokenType.IF, new IfExpressionParslet());
+      RegisterPrefix(TokenType.STRING, new StringParslet());
 
       RegisterInfix(TokenType.OR, new InfixOperatorParslet(BindingPower.OR, true));
       RegisterInfix(TokenType.AND, new InfixOperatorParslet(BindingPower.AND, true));
@@ -332,10 +345,19 @@ namespace Monkey
       {
         parser.NextToken();
 
-        if (!parser.ExpectPeek(TokenType.LBRACE))
+        if (!parser.PeekTokenIs(TokenType.LBRACE) && !parser.PeekTokenIs(TokenType.IF))
           return null;
 
-        expr.Alternative = new BlockStatementParslet().Parse(parser);
+        if (parser.PeekTokenIs(TokenType.LBRACE))
+        {
+          parser.NextToken();
+          expr.Alternative = new BlockStatementParslet().Parse(parser);
+        }
+        else
+        {
+          parser.NextToken();
+          expr.Alternative = parser.ParseExpression(BindingPower.LOWEST);
+        }
       }
 
       return expr;

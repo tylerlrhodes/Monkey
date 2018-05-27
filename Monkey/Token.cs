@@ -40,7 +40,8 @@ namespace Monkey
     ELSE,
     FUNCTION,
     RETURN,
-    COMMA
+    COMMA,
+    STRING
   }
 
   public struct Token

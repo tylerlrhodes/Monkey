@@ -41,6 +41,9 @@ namespace Monkey
         case ExpressionStatement es:
           return Eval(es.Expression, env);
 
+        case StringLiteral sl:
+          return new String() {Value = sl.Value};
+
         case IntegerLiteral il:
           return new Integer() { Value = il.Value };
 
@@ -196,6 +199,10 @@ namespace Monkey
       {
         return EvalIntegerInfixExpression(op, left, right);
       }
+      else if (left.Type() == ObjectType.STRING && right.Type() == ObjectType.STRING)
+      {
+        return EvalStringInfixExpression(op, left, right);
+      }
       else if (op == "==")
       {
         return NativeBoolToBoolean(left == right);
@@ -213,6 +220,20 @@ namespace Monkey
         return new Error() { Message = $"Unknown operator {left.Type()} {op} {right.Type()}" };
       }
       return null;
+    }
+
+    private IObject EvalStringInfixExpression(string op, IObject left, IObject right)
+    {
+      var lval = (left as String).Value;
+      var rval = (right as String).Value;
+
+      switch (op)
+      {
+        case "+":
+          return new String() {Value = lval + rval};
+        default:
+          return new Error() { Message = $"Unknown operator {left.Type()} {op} {right.Type()}" };
+      }
     }
 
     private IObject EvalIntegerInfixExpression(string op, IObject left, IObject right)
@@ -281,6 +302,9 @@ namespace Monkey
             break;
           case Boolean b:
             result = b;
+            break;
+          case String s:
+            result = s;
             break;
           case ReturnValue rv:
             result = rv;

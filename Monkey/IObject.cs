@@ -12,7 +12,8 @@ namespace Monkey
     BOOLEAN,
     ERROR,
     RETURNVALUE,
-    FUNCTION
+    FUNCTION,
+    STRING
   }
 
   public interface IObject
@@ -58,6 +59,21 @@ namespace Monkey
     public string Inspect()
     {
       return Value.Inspect();
+    }
+  }
+
+  public class String : IObject
+  {
+    public string Value { get; set; }
+
+    public ObjectType Type()
+    {
+      return ObjectType.STRING;
+    }
+
+    public string Inspect()
+    {
+      return Value;
     }
   }
 

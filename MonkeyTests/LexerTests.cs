@@ -8,6 +8,30 @@ namespace MonkeyTests
   public class LexerTests
   {
     [Fact]
+    public void Test2()
+    {
+      const string input = @"""String test""";
+
+      var expected = new List<Token>()
+      {
+        new Token()
+        {
+          Type = TokenType.STRING,
+          Literal = "String test"
+        }
+      };
+
+      var lexer = new Lexer(input);
+
+      foreach (var token in expected)
+      {
+        var curToken = lexer.NextToken();
+
+        Assert.Equal(token, curToken);
+      }
+    }
+
+    [Fact]
     public void Test1()
     {
       const string input = "4 + 3 - 2 * 5 / 10 + (2 + 3)^3 || 1 && 2";

@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Text;
+
 // ReSharper disable InconsistentNaming
 
 namespace Monkey
@@ -31,19 +31,14 @@ namespace Monkey
     {
       if (Statements.Count > 0)
         return Statements[0].TokenLiteral();
-      else
-      {
-        return "";
-      }
+      return "";
     }
 
     public override string ToString()
     {
-      string str = "";
+      var str = "";
       foreach (var statement in Statements)
-      {
         str += statement.ToString() + "\n";
-      }
       return str;
     }
   }
@@ -66,6 +61,27 @@ namespace Monkey
     }
 
     public void StatementNode()
+    {
+      throw new NotImplementedException();
+    }
+  }
+
+  public class StringLiteral : IExpression
+  {
+    public Token token { get; set; }
+    public string Value { get; set; }
+
+    public string TokenLiteral()
+    {
+      return token.Literal;
+    }
+
+    public override string ToString()
+    {
+      return token.Literal;
+    }
+
+    public void ExpressionNode()
     {
       throw new NotImplementedException();
     }
@@ -98,7 +114,6 @@ namespace Monkey
     public string op { get; set; }
     public IExpression right { get; set; }
 
-
     public string TokenLiteral()
     {
       return token.Literal;
@@ -121,7 +136,6 @@ namespace Monkey
     public IExpression left { get; set; }
     public string op { get; set; }
     public IExpression right { get; set; }
-
 
     public string TokenLiteral()
     {
@@ -157,7 +171,7 @@ namespace Monkey
 
     public override string ToString()
     {
-      string str = "";
+      var str = "";
       str += token.Literal;
 
       var parameters = from p in Parameters
@@ -191,14 +205,14 @@ namespace Monkey
 
     public override string ToString()
     {
-      string str = "";
+      var str = "";
 
       str += Function.ToString();
       str += "(";
 
       var args = from arg in Arguments select arg.ToString();
 
-      str += String.Join(",", args);
+      str += string.Join(",", args);
 
       str += ")";
 
@@ -223,11 +237,9 @@ namespace Monkey
 
     public override string ToString()
     {
-      string str = "";
+      var str = "";
       foreach (var statement in Statements)
-      {
         str += statement.ToString() + "\n";
-      }
       return str;
     }
   }
@@ -284,7 +296,7 @@ namespace Monkey
     public Token token { get; set; }
     public IExpression Condition { get; set; }
     public BlockStatement Consequence { get; set; }
-    public BlockStatement Alternative { get; set; }
+    public INode Alternative { get; set; }
 
     public string TokenLiteral()
     {
@@ -298,13 +310,13 @@ namespace Monkey
 
     public override string ToString()
     {
-      string str = "";
+      var str = "";
       str += "if";
       str += Condition.ToString();
-      str += " " + Consequence.ToString();
+      str += " " + Consequence;
 
       if (Alternative != null)
-        str += "else " + Alternative.ToString();
+        str += "else " + Alternative;
 
       return str;
     }

@@ -78,5 +78,17 @@ namespace MonkeyTests
 
       Assert.Equal("(2 + 4)\n10\n", code.ToString());
     }
+
+    [Fact]
+    public void TestPrefix6()
+    {
+      var lexer = new Lexer(@"""String Test""");
+      var parser = new Parser(lexer);
+
+      var code = parser.ParseCode();
+      System.Console.WriteLine(code);
+
+      Assert.Equal("String Test\n", code.ToString());
+    }
   }
 }
