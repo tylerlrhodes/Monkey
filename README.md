@@ -1,3 +1,5 @@
-# Calculator
+# Monkey Interperter
 
-Simple Calculator using pratt parsing ... in progress.
+Based on the book Writing an Interpreter in Go by Thorsten Ball
+
+
