@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 using Xunit;
-using Calculator;
+using Monkey;
 
-namespace CalculatorTests
+namespace MonkeyTests
 {
   public class LexerTests
   {

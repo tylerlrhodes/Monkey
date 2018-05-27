@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 using Xunit;
-using Calculator;
+using Monkey;
 
-namespace CalculatorTests
+namespace MonkeyTests
 {
   public class ParserTest
   {

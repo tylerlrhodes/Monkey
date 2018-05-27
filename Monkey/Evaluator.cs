@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 // ReSharper disable All
 
-namespace Calculator
+namespace Monkey
 {
   public class Evaluator
   {

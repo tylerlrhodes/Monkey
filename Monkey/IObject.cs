@@ -4,7 +4,7 @@ using System.Text;
 using System.Linq;
 // ReSharper disable InconsistentNaming
 
-namespace Calculator
+namespace Monkey
 {
   public enum ObjectType
   {

@@ -4,7 +4,7 @@ using System.Text;
 // ReSharper disable InconsistentNaming
 
 
-namespace Calculator
+namespace Monkey
 {
   public enum TokenType
   {

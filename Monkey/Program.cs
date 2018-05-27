@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace Calculator
+namespace Monkey
 {
   class Program
   {

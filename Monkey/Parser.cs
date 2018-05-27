@@ -4,7 +4,7 @@ using System.Reflection.Metadata.Ecma335;
 using System.Text;
 // ReSharper disable All
 
-namespace Calculator
+namespace Monkey
 {
   public enum BindingPower
   {
