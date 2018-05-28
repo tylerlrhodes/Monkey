@@ -6,16 +6,13 @@ let test = fn(x) {
   {
     return f()
   }
-  let x = x - 1
-  return test (x)
+  return x + test (x-1)
 }
 
-test(a)
-
-let f = fn() { return 1 }
+let f = fn() { return 0 }
 
 let result = test(a)
 
-puts(result)
+puts("The result was ", result)
 
-
+puts("hello world")

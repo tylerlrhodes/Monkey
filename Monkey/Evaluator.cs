@@ -209,6 +209,7 @@ namespace Monkey
       return val;
     }
 
+    // build this up
     private IObject EvalInfixExpression(string op, IObject left, IObject right)
     {
       if (left.Type() == ObjectType.INTEGER && right.Type() == ObjectType.INTEGER)
@@ -291,9 +292,19 @@ namespace Monkey
       {
         case "-":
           return EvalMinusPrefixOperatorExpression(right);
+        case "!":
+          return EvalBangPrefixOperatorExpression(right);
         default:
           return new Error() { Message = $"Unknown operator {op}" };
       }
+    }
+
+    private IObject EvalBangPrefixOperatorExpression(IObject right)
+    {
+      if (right.Type() != ObjectType.BOOLEAN)
+        return new Error() {Message = $"Unknown operator !{right.Type()}"};
+
+      return new Boolean() {Value = !(right as Boolean).Value};
     }
 
     private IObject EvalMinusPrefixOperatorExpression(IObject right)

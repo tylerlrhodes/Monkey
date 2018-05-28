@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace Monkey
@@ -12,17 +13,23 @@ namespace Monkey
     {
       BuiltInFunctions["puts"] = new BuiltIn()
       {
-        Fn = (List<IObject> objects) =>
+        Fn = (objects) =>
         {
-          var str = "";
-          foreach (var @object in objects)
-          {
-            str += @object.Inspect();
-          }
+          var str = objects.Aggregate("", (current, @object) => current + @object.Inspect());
 
           System.Console.WriteLine(str);
 
           return new Integer() { Value = 0 };
+        }
+      };
+      BuiltInFunctions["toStr"] = new BuiltIn()
+      {
+        Fn = (objects) =>
+        {
+          if (objects.Count != 1)
+            return new Error() {Message = "Wrong number of arguments provided to toStr()"};
+          
+          return new String() { Value = objects[0].Inspect() };
         }
       };
     }

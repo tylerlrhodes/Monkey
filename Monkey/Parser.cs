@@ -137,6 +137,7 @@ namespace Monkey
       RegisterPrefix(TokenType.STRING, new StringParslet());
       RegisterPrefix(TokenType.TRUE, new BooleanParslet());
       RegisterPrefix(TokenType.FALSE, new BooleanParslet());
+      RegisterPrefix(TokenType.BANG, new PrefixOperatorParslet());
 
       RegisterInfix(TokenType.OR, new InfixOperatorParslet(BindingPower.OR, true));
       RegisterInfix(TokenType.AND, new InfixOperatorParslet(BindingPower.AND, true));

@@ -22,6 +22,7 @@ namespace Monkey
 
     PLUS,
     MINUS,
+    BANG,
     ASTERISK,
     FSLASH,
     CARROT,

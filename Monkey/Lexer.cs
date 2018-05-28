@@ -82,6 +82,9 @@ namespace Monkey
         case '+':
           token = NewToken(TokenType.PLUS, _ch.ToString());
           break;
+        case '!':
+          token = NewToken(TokenType.BANG, _ch.ToString());
+          break;
         case '-':
           token = NewToken(TokenType.MINUS, _ch.ToString());
           break;
