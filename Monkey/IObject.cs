@@ -13,7 +13,8 @@ namespace Monkey
     ERROR,
     RETURNVALUE,
     FUNCTION,
-    STRING
+    STRING,
+    BUILTIN
   }
 
   public interface IObject

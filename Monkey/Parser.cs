@@ -135,6 +135,8 @@ namespace Monkey
       RegisterPrefix(TokenType.FUNCTION, new FunctionLiteralParslet());
       RegisterPrefix(TokenType.IF, new IfExpressionParslet());
       RegisterPrefix(TokenType.STRING, new StringParslet());
+      RegisterPrefix(TokenType.TRUE, new BooleanParslet());
+      RegisterPrefix(TokenType.FALSE, new BooleanParslet());
 
       RegisterInfix(TokenType.OR, new InfixOperatorParslet(BindingPower.OR, true));
       RegisterInfix(TokenType.AND, new InfixOperatorParslet(BindingPower.AND, true));
@@ -319,6 +321,18 @@ namespace Monkey
 
     public Token CurrentToken() => _curToken;
 
+  }
+
+  public class BooleanParslet : IPrefixParslet
+  {
+    public IExpression Parse(Parser parser, Token token)
+    {
+      return new BooleanLiteral()
+      {
+        token = token,
+        Value = bool.Parse(token.Literal)
+      };
+    }
   }
 
   public class IfExpressionParslet : IPrefixParslet

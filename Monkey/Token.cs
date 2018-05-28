@@ -41,7 +41,9 @@ namespace Monkey
     FUNCTION,
     RETURN,
     COMMA,
-    STRING
+    STRING,
+    TRUE,
+    FALSE
   }
 
   public struct Token
@@ -68,6 +70,10 @@ namespace Monkey
           return TokenType.IF;
         case "else":
           return TokenType.ELSE;
+        case "true":
+          return TokenType.TRUE;
+        case "false":
+          return TokenType.FALSE;
         default:
           return TokenType.IDENT;
       }

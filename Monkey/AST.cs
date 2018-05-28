@@ -66,6 +66,27 @@ namespace Monkey
     }
   }
 
+  public class BooleanLiteral : IExpression
+  {
+    public Token token { get; set; }
+    public bool Value { get; set; }
+
+    public string TokenLiteral()
+    {
+      return token.Literal;
+    }
+
+    public override string ToString()
+    {
+      return Value.ToString();
+    }
+
+    public void ExpressionNode()
+    {
+      throw new NotImplementedException();
+    }
+  }
+
   public class StringLiteral : IExpression
   {
     public Token token { get; set; }

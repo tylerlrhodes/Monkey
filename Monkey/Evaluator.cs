@@ -47,6 +47,9 @@ namespace Monkey
         case IntegerLiteral il:
           return new Integer() { Value = il.Value };
 
+        case BooleanLiteral bl:
+          return bl.Value == true ? TRUE : FALSE;
+
         case PrefixExpression pe:
           right = Eval(pe.right, env);
           if (right is Error)
@@ -79,7 +82,7 @@ namespace Monkey
           {
             return args[0];
           }
-          return ApplyFunction(function as Function, args);
+          return ApplyFunction(function, args);
       }
 
       return null;
@@ -130,18 +133,25 @@ namespace Monkey
       return env;
     }
 
-    private IObject ApplyFunction(Function function, List<IObject> args)
+    private IObject ApplyFunction(IObject function, List<IObject> args)
     {
-      if (!(function is Function))
+      if (!(function is Function) && !(function is BuiltIn))
       {
         return new Error() { Message = $"not a function {function.Type()}" };
       }
 
-      if (args.Count != function.Parameters.Count)
+      if (function is BuiltIn)
+      {
+        return (function as BuiltIn).Fn(args);
+      }
+
+      var func = function as Function;
+
+      if (args.Count != func.Parameters.Count)
         return new Error() { Message = "Invalid argument count." };
 
-      var extendedEnv = ExtendFunctionEnv(function, args);
-      var evaluated = Eval(function.Body, extendedEnv);
+      var extendedEnv = ExtendFunctionEnv(func, args);
+      var evaluated = Eval(func.Body, extendedEnv);
 
       return UnwrapReturnValue(evaluated);
 
@@ -187,6 +197,12 @@ namespace Monkey
 
     private IObject EvalIdentifier(Identifier identifier, Environment env)
     {
+      if (BuiltIns.BuiltInFunctions.ContainsKey(identifier.Value))
+      {
+        var builtin = BuiltIns.BuiltInFunctions[identifier.Value];
+        return builtin;
+      }
+
       var (val, ok) = env.Get(identifier.Value);
       if (!ok)
         return new Error() { Message = $"identifier not found: {identifier.Value}" };

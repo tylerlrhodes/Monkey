@@ -60,7 +60,7 @@ namespace Monkey
 
         while (expr != ";")
         {
-          text += expr;
+          text += expr + "\n";
           expr = Console.ReadLine();
         }
 
