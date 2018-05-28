@@ -20,89 +20,7 @@ namespace Monkey
     CALL
   }
 
-  interface IInfixParslet
-  {
-    IExpression Parse(Parser parser, IExpression function, Token token);
-    BindingPower GetBindingPower();
-  }
-
-  class InfixOperatorParslet : IInfixParslet
-  {
-    private BindingPower _bindingPower;
-
-    public BindingPower GetBindingPower() => _bindingPower;
-
-    private bool _isRight;
-
-    public InfixOperatorParslet(BindingPower bindingPower, bool isRight)
-    {
-      _bindingPower = bindingPower;
-      _isRight = isRight;
-    }
-
-    public IExpression Parse(Parser parser, IExpression function, Token tok)
-    {
-      var expression = new InfixExpression()
-      {
-        token = tok,
-        op = tok.Literal,
-        left = function
-      };
-
-      parser.NextToken();
-
-      expression.right = parser.ParseExpression(_bindingPower - (_isRight ? 1 : 0));
-
-      return expression;
-    }
-  }
-
-  interface IPrefixParslet
-  {
-    IExpression Parse(Parser parser, Token token);
-  }
-
-  class StringParslet : IPrefixParslet
-  {
-    public IExpression Parse(Parser parser, Token token)
-    {
-      return new StringLiteral()
-      {
-        token = token,
-        Value = token.Literal
-      };
-    }
-  }
-
-  class IntegerParslet : IPrefixParslet
-  {
-    public IExpression Parse(Parser parser, Token token)
-    {
-      return new IntegerLiteral()
-      {
-        token = token,
-        Value = int.Parse(token.Literal)
-      };
-    }
-  }
-
-  class PrefixOperatorParslet : IPrefixParslet
-  {
-    public IExpression Parse(Parser parser, Token token)
-    {
-      parser.NextToken();
-
-      IExpression operand = parser.ParseExpression(BindingPower.PREFIX);
-
-      return new PrefixExpression()
-      {
-        token = token,
-        op = token.Literal,
-        right = operand
-      };
-    }
-  }
-
+ 
   public class Parser
   {
     private readonly Dictionary<TokenType, IPrefixParslet> _prefixParslets = new Dictionary<TokenType, IPrefixParslet>();
@@ -322,6 +240,89 @@ namespace Monkey
 
     public Token CurrentToken() => _curToken;
 
+  }
+
+  interface IInfixParslet
+  {
+    IExpression Parse(Parser parser, IExpression function, Token token);
+    BindingPower GetBindingPower();
+  }
+
+  class InfixOperatorParslet : IInfixParslet
+  {
+    private BindingPower _bindingPower;
+
+    public BindingPower GetBindingPower() => _bindingPower;
+
+    private bool _isRight;
+
+    public InfixOperatorParslet(BindingPower bindingPower, bool isRight)
+    {
+      _bindingPower = bindingPower;
+      _isRight = isRight;
+    }
+
+    public IExpression Parse(Parser parser, IExpression function, Token tok)
+    {
+      var expression = new InfixExpression()
+      {
+        token = tok,
+        op = tok.Literal,
+        left = function
+      };
+
+      parser.NextToken();
+
+      expression.right = parser.ParseExpression(_bindingPower - (_isRight ? 1 : 0));
+
+      return expression;
+    }
+  }
+
+  interface IPrefixParslet
+  {
+    IExpression Parse(Parser parser, Token token);
+  }
+
+  class StringParslet : IPrefixParslet
+  {
+    public IExpression Parse(Parser parser, Token token)
+    {
+      return new StringLiteral()
+      {
+        token = token,
+        Value = token.Literal
+      };
+    }
+  }
+
+  class IntegerParslet : IPrefixParslet
+  {
+    public IExpression Parse(Parser parser, Token token)
+    {
+      return new IntegerLiteral()
+      {
+        token = token,
+        Value = int.Parse(token.Literal)
+      };
+    }
+  }
+
+  class PrefixOperatorParslet : IPrefixParslet
+  {
+    public IExpression Parse(Parser parser, Token token)
+    {
+      parser.NextToken();
+
+      IExpression operand = parser.ParseExpression(BindingPower.PREFIX);
+
+      return new PrefixExpression()
+      {
+        token = token,
+        op = token.Literal,
+        right = operand
+      };
+    }
   }
 
   public class BooleanParslet : IPrefixParslet

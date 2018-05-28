@@ -7,7 +7,7 @@ namespace Monkey
   {
     static void Main(string[] args)
     {
-      Console.WriteLine("Calculator 1.0");
+      Console.WriteLine("Monkey 1.0");
 
       if (args.Length != 1)
       {
