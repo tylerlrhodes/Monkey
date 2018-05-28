@@ -90,5 +90,29 @@ namespace MonkeyTests
 
       Assert.Equal("String Test\n", code.ToString());
     }
+
+    [Fact]
+    public void TestPrefix7()
+    {
+      var lexer = new Lexer(@"true");
+      var parser = new Parser(lexer);
+
+      var code = parser.ParseCode();
+      System.Console.WriteLine(code);
+
+      Assert.Equal("True\n", code.ToString());
+    }
+
+    [Fact]
+    public void TestPrefix8()
+    {
+      var lexer = new Lexer(@"false");
+      var parser = new Parser(lexer);
+
+      var code = parser.ParseCode();
+      System.Console.WriteLine(code);
+
+      Assert.Equal("False\n", code.ToString());
+    }
   }
 }

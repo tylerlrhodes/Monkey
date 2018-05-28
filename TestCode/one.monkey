@@ -14,5 +14,8 @@ test(a)
 
 let f = fn() { return 1 }
 
-test(a)
+let result = test(a)
+
+puts(result)
+
 
