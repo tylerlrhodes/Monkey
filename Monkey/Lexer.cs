@@ -103,6 +103,15 @@ namespace Monkey
         case ')':
           token = NewToken(TokenType.RPAREN, _ch.ToString());
           break;
+        case '[':
+          token = NewToken(TokenType.LBRACKET, _ch.ToString());
+          break;
+        case ']':
+          token = NewToken(TokenType.RBRACKET, _ch.ToString());
+          break;
+        case ':':
+          token = NewToken(TokenType.COLON, _ch.ToString());
+          break;
         case (char)0:
           token = NewToken(TokenType.EOF, "");
           break;
@@ -134,11 +143,11 @@ namespace Monkey
 
     private Token NewStringToken()
     {
-      var token = new Token() {Type = TokenType.STRING};
+      var token = new Token() { Type = TokenType.STRING };
 
       var position = _position;
 
-      while(_ch != '"')
+      while (_ch != '"')
         ReadChar();
 
       token.Literal = _input.Substring(position, _position - position);
@@ -154,9 +163,9 @@ namespace Monkey
 
     private void ReadChar()
     {
-      if (_readPosition > _input.Length-1)
+      if (_readPosition > _input.Length - 1)
       {
-        _ch = (char) 0;
+        _ch = (char)0;
       }
       else
       {
@@ -175,7 +184,7 @@ namespace Monkey
     private char PeekChar()
     {
       if (_readPosition > _input.Length)
-        return (char) 0;
+        return (char)0;
       else
       {
         return _input[_readPosition];

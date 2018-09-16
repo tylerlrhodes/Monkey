@@ -17,10 +17,11 @@ namespace Monkey
     PRODUCT = 50,
     POWER = 60,
     PREFIX = 70,
-    CALL
+    CALL,
+    INDEX
   }
 
- 
+
   public class Parser
   {
     private readonly Dictionary<TokenType, IPrefixParslet> _prefixParslets = new Dictionary<TokenType, IPrefixParslet>();
@@ -30,16 +31,11 @@ namespace Monkey
 
     private Lexer _lexer;
 
-    public List<string> Errors
-    {
-      get { return _errors; }
-    }
-
-    private List<string> _errors = new List<string>();
+    public List<string> Errors { get; } = new List<string>();
 
     public bool HasError
     {
-      get { return _errors.Count > 0 ? true : false; }
+      get { return Errors.Count > 0 ? true : false; }
     }
 
     public Parser(Lexer lexer)
@@ -56,6 +52,8 @@ namespace Monkey
       RegisterPrefix(TokenType.TRUE, new BooleanParslet());
       RegisterPrefix(TokenType.FALSE, new BooleanParslet());
       RegisterPrefix(TokenType.BANG, new PrefixOperatorParslet());
+      RegisterPrefix(TokenType.LBRACKET, new ArrayLiteralParslet());
+      RegisterPrefix(TokenType.LBRACE, new HashLiteralParslet());
 
       RegisterInfix(TokenType.OR, new InfixOperatorParslet(BindingPower.OR, true));
       RegisterInfix(TokenType.AND, new InfixOperatorParslet(BindingPower.AND, true));
@@ -69,6 +67,7 @@ namespace Monkey
       RegisterInfix(TokenType.ASTERISK, new InfixOperatorParslet(BindingPower.PRODUCT, false));
       RegisterInfix(TokenType.FSLASH, new InfixOperatorParslet(BindingPower.SUM, false));
       RegisterInfix(TokenType.LPAREN, new ParseCallExpressionParslet(BindingPower.CALL, false));
+      RegisterInfix(TokenType.LBRACKET, new IndexExpressionParslet(BindingPower.INDEX));
 
       NextToken();
       NextToken();
@@ -92,12 +91,20 @@ namespace Monkey
       return null;
     }
 
+    private IInfixParslet GetInfixParslet(TokenType peekTokenType)
+    {
+      if (_infixParslets.ContainsKey(peekTokenType))
+        return _infixParslets[peekTokenType];
+
+      return null;
+    }
+
     public IExpression ParseExpression(BindingPower bindingPower)
     {
       var prefixParslet = GetPrefixParslet(_curToken.Type);
       if (prefixParslet == null)
       {
-        _errors.Add($"No Prefix Parslet for {_curToken.Type}");
+        Errors.Add($"No Prefix Parslet for {_curToken.Type}");
 
         return null;
       }
@@ -118,14 +125,6 @@ namespace Monkey
       }
 
       return leftexp;
-    }
-
-    private IInfixParslet GetInfixParslet(TokenType peekTokenType)
-    {
-      if (_infixParslets.ContainsKey(peekTokenType))
-        return _infixParslets[peekTokenType];
-
-      return null;
     }
 
     private BindingPower PeekBindingPower()
@@ -166,12 +165,12 @@ namespace Monkey
 
     private IStatement ParseLetStatement()
     {
-      var stmt = new LetStatement() {token = _curToken};
+      var stmt = new LetStatement() { token = _curToken };
 
       if (!ExpectPeek(TokenType.IDENT))
         return null;
 
-      stmt.Name = new Identifier() {token = _curToken, Value = _curToken.Literal};
+      stmt.Name = new Identifier() { token = _curToken, Value = _curToken.Literal };
 
       if (!ExpectPeek(TokenType.ASSIGN))
         return null;
@@ -194,7 +193,7 @@ namespace Monkey
 
     private ReturnStatement ParseReturnStatement()
     {
-      var stmt = new ReturnStatement() {token = _curToken};
+      var stmt = new ReturnStatement() { token = _curToken };
 
       NextToken();
 
@@ -235,7 +234,7 @@ namespace Monkey
 
     private void PeekError(TokenType tokenType)
     {
-      _errors.Add($"Expected next token to be {tokenType} but got {_peekToken.Type} instead.");
+      Errors.Add($"Expected next token to be {tokenType} but got {_peekToken.Type} instead.");
     }
 
     public Token CurrentToken() => _curToken;
@@ -341,7 +340,7 @@ namespace Monkey
   {
     public IExpression Parse(Parser parser, Token token)
     {
-      var expr = new IfExpression() {token = parser.CurrentToken()};
+      var expr = new IfExpression() { token = parser.CurrentToken() };
 
       if (!parser.ExpectPeek(TokenType.LPAREN))
         return null;
@@ -396,7 +395,7 @@ namespace Monkey
 
     public IExpression Parse(Parser parser, IExpression function, Token token)
     {
-      var exp = new CallExpression() {token = token, Function = function};
+      var exp = new CallExpression() { token = token, Function = function };
       exp.Arguments = ParseCallArguments(parser);
       return exp;
     }
@@ -433,7 +432,7 @@ namespace Monkey
   {
     public IExpression Parse(Parser parser, Token token)
     {
-      var literal = new FunctionLiteral() {token = token};
+      var literal = new FunctionLiteral() { token = token };
 
       if (!parser.ExpectPeek(TokenType.LPAREN))
         return null;
@@ -460,7 +459,7 @@ namespace Monkey
 
       parser.NextToken();
 
-      var ident = new Identifier() {token = parser.CurrentToken(), Value = parser.CurrentToken().Literal};
+      var ident = new Identifier() { token = parser.CurrentToken(), Value = parser.CurrentToken().Literal };
       identifiers.Add(ident);
 
       while (parser.PeekTokenIs(TokenType.COMMA))
@@ -482,7 +481,7 @@ namespace Monkey
   {
     public BlockStatement Parse(Parser parser)
     {
-      var block = new BlockStatement() {token = parser.CurrentToken(), Statements = new List<IStatement>()};
+      var block = new BlockStatement() { token = parser.CurrentToken(), Statements = new List<IStatement>() };
 
       parser.NextToken();
 
@@ -502,7 +501,7 @@ namespace Monkey
   {
     public IExpression Parse(Parser parser, Token token)
     {
-      return new Identifier() {token = token, Value = token.Literal };
+      return new Identifier() { token = token, Value = token.Literal };
     }
   }
 
@@ -520,6 +519,105 @@ namespace Monkey
       }
 
       return exp;
+    }
+  }
+
+  public class IndexExpressionParslet : IInfixParslet
+  {
+    private BindingPower _bindingPower;
+
+    public BindingPower GetBindingPower() => _bindingPower;
+
+    public IndexExpressionParslet(BindingPower bp)
+    {
+      _bindingPower = bp;
+    }
+
+    public IExpression Parse(Parser parser, IExpression function, Token token)
+    {
+      var exp = new IndexExpression()
+      {
+        token = token,
+        Left = function
+      };
+
+      parser.NextToken();
+      exp.Index = parser.ParseExpression(BindingPower.LOWEST);
+
+      if (!parser.ExpectPeek(TokenType.RBRACKET))
+        return null;
+
+      return exp;
+    }
+  }
+
+  public class HashLiteralParslet : IPrefixParslet
+  {
+    public IExpression Parse(Parser parser, Token token)
+    {
+      var hash = new HashLiteral
+      {
+        token = token,
+        Pairs = new Dictionary<IExpression, IExpression>()
+      };
+
+      while (!parser.PeekTokenIs(TokenType.RBRACE))
+      {
+        parser.NextToken();
+        var key = parser.ParseExpression(BindingPower.LOWEST);
+
+        if (!parser.ExpectPeek(TokenType.COLON))
+          return null;
+
+        parser.NextToken();
+        var value = parser.ParseExpression(BindingPower.LOWEST);
+
+        hash.Pairs[key] = value;
+
+        if (!parser.PeekTokenIs(TokenType.RBRACE) && !parser.PeekTokenIs(TokenType.COMMA))
+          return null;
+      }
+
+      return hash;
+    }
+  }
+
+  public class ArrayLiteralParslet : IPrefixParslet
+  {
+    public IExpression Parse(Parser parser, Token token)
+    {
+      return new ArrayLiteral
+      {
+        token = token,
+        Elements = ParseExpressionList(parser)
+      };
+    }
+
+    private List<IExpression> ParseExpressionList(Parser parser)
+    {
+      var args = new List<IExpression>();
+
+      if (parser.PeekTokenIs(TokenType.RBRACKET))
+      {
+        parser.NextToken();
+        return args;
+      }
+
+      parser.NextToken();
+
+      args.Add(parser.ParseExpression(BindingPower.LOWEST));
+
+      while (parser.PeekTokenIs(TokenType.COMMA))
+      {
+        parser.NextToken();
+        parser.NextToken();
+        args.Add(parser.ParseExpression(BindingPower.LOWEST));
+      }
+
+      if (!parser.ExpectPeek(TokenType.RBRACKET))
+        return null;
+
+      return args;
     }
   }
 }

@@ -12,6 +12,7 @@ namespace Monkey
 
     public IObject Eval(INode node, Environment env)
     {
+      IObject left;
       IObject right;
       IObject val;
       switch (node)
@@ -57,7 +58,7 @@ namespace Monkey
           return EvalPrefixExpression(pe.op, right);
 
         case InfixExpression ie:
-          var left = Eval(ie.left, env);
+          left = Eval(ie.left, env);
           if (left is Error)
             return left;
           right = Eval(ie.right, env);
@@ -83,9 +84,99 @@ namespace Monkey
             return args[0];
           }
           return ApplyFunction(function, args);
+
+        case ArrayLiteral al:
+          var elements = EvalExpressions(al.Elements, env);
+          if (elements.Count == 1 && IsError(elements[0]))
+            return elements[0];
+          return new Array() { Elements = elements };
+
+        case IndexExpression ie:
+          left = Eval(ie.Left, env);
+          if (IsError(left))
+            return left;
+          var index = Eval(ie.Index, env);
+          if (IsError(index))
+            return index;
+          return EvalIndexExpression(left, index);
+
+        case HashLiteral hl:
+          return EvalHashLiteral(hl, env);
       }
 
       return null;
+    }
+
+    private IObject EvalHashLiteral(HashLiteral hl, Environment env)
+    {
+      var pairs = new Dictionary<int, HashPair>();
+
+      foreach (var pair in (hl as HashLiteral).Pairs)
+      {
+        var key = Eval(pair.Key, env);
+        if (IsError(key))
+          return key;
+
+        if (!(key is IHashable))
+          return new Error { Message = "unusable as hashkey..." };
+
+        var hashKey = key as IHashable;
+
+        var value = Eval(pair.Value, env);
+        if (IsError(value))
+          return value;
+
+        var hashed = hashKey.HashKey();
+        pairs[hashed] = new HashPair() { Key = key, Value = value };
+      }
+
+      return new Hash() { Pairs = pairs };
+    }
+
+    private IObject EvalIndexExpression(IObject left, IObject index)
+    {
+      if (left.Type() == ObjectType.ARRAY && index.Type() == ObjectType.INTEGER)
+        return EvalArrayIndexExpression(left, index);
+      else if (left.Type() == ObjectType.HASH)
+        return EvalHashIndexExpression(left, index);
+      else
+        return new Error { Message = "index operator not supported..." };
+    }
+
+    private IObject EvalHashIndexExpression(IObject left, IObject index)
+    {
+      var hashObject = left as Hash;
+
+      if (!(index is IHashable))
+        return new Error() { Message = "unusable as hashkey..." };
+
+      var key = index as IHashable;
+
+      if (!hashObject.Pairs.ContainsKey(key.HashKey()))
+        return null;
+
+      return hashObject.Pairs[key.HashKey()].Value;
+    }
+
+    private IObject EvalArrayIndexExpression(IObject left, IObject index)
+    {
+      var arrayObject = left as Array;
+      var idx = (index as Integer).Value;
+
+      var max = arrayObject.Elements.Count - 1;
+
+      if (idx < 0 || idx > max)
+        return null;
+
+      return arrayObject.Elements[idx];
+    }
+
+
+    private bool IsError(IObject @object)
+    {
+      if (@object != null)
+        return @object.Type() == ObjectType.ERROR;
+      return false;
     }
 
     private IObject EvalIfExpression(IfExpression ie, Environment env)
@@ -269,7 +360,7 @@ namespace Monkey
         case "/":
           return new Integer() { Value = lval / rval };
         case "^":
-          return new Integer() { Value = (long)Math.Pow(lval, rval) };
+          return new Integer() { Value = (int)Math.Pow(lval, rval) };
         case "<":
           return NativeBoolToBoolean(lval < rval);
         case ">":

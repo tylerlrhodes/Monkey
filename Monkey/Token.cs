@@ -37,6 +37,11 @@ namespace Monkey
     LBRACE,
     RBRACE,
 
+    LBRACKET,
+    RBRACKET,
+
+    COLON,
+
     IF,
     ELSE,
     FUNCTION,

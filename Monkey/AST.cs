@@ -111,7 +111,7 @@ namespace Monkey
   public class IntegerLiteral : IExpression
   {
     public Token token { get; set; }
-    public long Value { get; set; }
+    public int Value { get; set; }
 
     public string TokenLiteral()
     {
@@ -258,10 +258,10 @@ namespace Monkey
 
     public override string ToString()
     {
-      var str = "";
+      var str = "{\n";
       foreach (var statement in Statements)
         str += statement.ToString() + "\n";
-      return str;
+      return str + "}";
     }
   }
 
@@ -361,6 +361,65 @@ namespace Monkey
     public override string ToString()
     {
       return Value;
+    }
+  }
+
+  public class ArrayLiteral : IExpression
+  {
+    public Token token { get; set; }
+    public List<IExpression> Elements { get; set; }
+
+    public void ExpressionNode()
+    {
+      throw new NotImplementedException();
+    }
+
+    public string TokenLiteral()
+    {
+      return token.Literal;
+    }
+
+    public override string ToString()
+    {
+      return $"[{string.Join(",", Elements)}]";
+    }
+  }
+
+  public class IndexExpression : IExpression
+  {
+    public Token token { get; set; }
+    public IExpression Left { get; set; }
+    public IExpression Index { get; set; }
+
+    public void ExpressionNode()
+    {
+      throw new NotImplementedException();
+    }
+
+    public string TokenLiteral()
+    {
+      return token.Literal;
+    }
+
+    public override string ToString()
+    {
+      return $"({Left.ToString()}[{Index.ToString()}])";
+    }
+  }
+
+  public class HashLiteral : IExpression
+  {
+    public Token token { get; set; }
+    public Dictionary<IExpression, IExpression> Pairs { get; set; }
+
+    public void ExpressionNode()
+    {
+      throw new NotImplementedException();
+    }
+
+    public string TokenLiteral()
+    {
+      throw new NotImplementedException();
     }
   }
 }

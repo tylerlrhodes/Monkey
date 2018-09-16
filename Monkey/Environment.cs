@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 
 namespace Monkey
 {
+  [Serializable]
   public class Environment
   {
 #pragma warning disable 414
@@ -35,5 +38,6 @@ namespace Monkey
     {
       return new Environment {_outer = outer};
     }
+
   }
 }

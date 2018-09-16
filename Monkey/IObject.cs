@@ -14,13 +14,20 @@ namespace Monkey
     RETURNVALUE,
     FUNCTION,
     STRING,
-    BUILTIN
+    BUILTIN,
+    ARRAY,
+    HASH
   }
 
   public interface IObject
   {
     ObjectType Type();
     string Inspect();
+  }
+
+  public interface IHashable
+  {
+    int HashKey();
   }
 
   public class Function : IObject
@@ -63,7 +70,7 @@ namespace Monkey
     }
   }
 
-  public class String : IObject
+  public class String : IObject, IHashable
   {
     public string Value { get; set; }
 
@@ -76,11 +83,16 @@ namespace Monkey
     {
       return Value;
     }
+
+    public int HashKey()
+    {
+      return Value.GetHashCode();
+    }
   }
 
-  public class Integer : IObject
+  public class Integer : IObject, IHashable
   {
-    public long Value { get; set; }
+    public int Value { get; set; }
 
     public ObjectType Type()
     {
@@ -89,11 +101,16 @@ namespace Monkey
 
     public string Inspect()
     {
-      return Value.ToString();
+      return Value.ToString("N");
+    }
+
+    public int HashKey()
+    {
+      return Value;
     }
   }
 
-  public class Boolean : IObject
+  public class Boolean : IObject, IHashable
   {
     public bool Value { get; set; }
 
@@ -105,6 +122,11 @@ namespace Monkey
     public string Inspect()
     {
       return Value.ToString();
+    }
+
+    public int HashKey()
+    {
+      return Value ? 1 : 0;
     }
   }
 
@@ -120,6 +142,43 @@ namespace Monkey
     public string Inspect()
     {
       return Message;
+    }
+  }
+
+  public class Array : IObject
+  {
+    public List<IObject> Elements = new List<IObject>();
+
+    public string Inspect()
+    {
+      return $"[{string.Join(",", Elements)}]";
+    }
+
+    public ObjectType Type()
+    {
+      return ObjectType.ARRAY;
+    }
+  }
+
+  public class HashPair
+  {
+    public IObject Key { get; set; }
+    public IObject Value { get; set; }
+  }
+
+  public class Hash : IObject
+  {
+    public Dictionary<int, HashPair> Pairs = new Dictionary<int, HashPair>();
+
+    public string Inspect()
+    {
+      var strings = Pairs.Select(x => $"{x.Key}: {x.Value}");
+      return "{" + string.Join(",", strings) + "}";
+    }
+
+    public ObjectType Type()
+    {
+      return ObjectType.HASH;
     }
   }
 }
