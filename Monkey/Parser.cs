@@ -574,9 +574,12 @@ namespace Monkey
 
         hash.Pairs[key] = value;
 
-        if (!parser.PeekTokenIs(TokenType.RBRACE) && !parser.PeekTokenIs(TokenType.COMMA))
+        if (!parser.PeekTokenIs(TokenType.RBRACE) && !parser.ExpectPeek(TokenType.COMMA))
           return null;
       }
+
+      if (!parser.ExpectPeek(TokenType.RBRACE))
+        return null;
 
       return hash;
     }

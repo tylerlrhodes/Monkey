@@ -15,12 +15,10 @@ namespace Monkey
 
   public interface IStatement : INode
   {
-    void StatementNode();
   }
 
   public interface IExpression : INode
   {
-    void ExpressionNode();
   }
 
   public class Code : INode
@@ -59,11 +57,6 @@ namespace Monkey
         return Expression.ToString();
       return "";
     }
-
-    public void StatementNode()
-    {
-      throw new NotImplementedException();
-    }
   }
 
   public class BooleanLiteral : IExpression
@@ -79,11 +72,6 @@ namespace Monkey
     public override string ToString()
     {
       return Value.ToString();
-    }
-
-    public void ExpressionNode()
-    {
-      throw new NotImplementedException();
     }
   }
 
@@ -101,11 +89,6 @@ namespace Monkey
     {
       return token.Literal;
     }
-
-    public void ExpressionNode()
-    {
-      throw new NotImplementedException();
-    }
   }
 
   public class IntegerLiteral : IExpression
@@ -121,11 +104,6 @@ namespace Monkey
     public override string ToString()
     {
       return token.Literal;
-    }
-
-    public void ExpressionNode()
-    {
-      throw new NotImplementedException();
     }
   }
 
@@ -143,11 +121,6 @@ namespace Monkey
     public override string ToString()
     {
       return "(" + op + right.ToString() + ")";
-    }
-
-    public void ExpressionNode()
-    {
-      throw new NotImplementedException();
     }
   }
 
@@ -167,11 +140,6 @@ namespace Monkey
     {
       return "(" + left?.ToString() + " " + op + " " + right?.ToString() + ")";
     }
-
-    public void ExpressionNode()
-    {
-      throw new NotImplementedException();
-    }
   }
 
   public class FunctionLiteral : IExpression
@@ -183,11 +151,6 @@ namespace Monkey
     public string TokenLiteral()
     {
       return token.Literal;
-    }
-
-    public void ExpressionNode()
-    {
-      throw new NotImplementedException();
     }
 
     public override string ToString()
@@ -219,11 +182,6 @@ namespace Monkey
       return token.Literal;
     }
 
-    public void ExpressionNode()
-    {
-      throw new NotImplementedException();
-    }
-
     public override string ToString()
     {
       var str = "";
@@ -251,11 +209,6 @@ namespace Monkey
       return token.Literal;
     }
 
-    public void StatementNode()
-    {
-      throw new NotImplementedException();
-    }
-
     public override string ToString()
     {
       var str = "{\n";
@@ -275,11 +228,6 @@ namespace Monkey
       return token.Literal;
     }
 
-    public void StatementNode()
-    {
-      throw new NotImplementedException();
-    }
-
     public override string ToString()
     {
       return $"{token.Literal} {ReturnValue}";
@@ -295,11 +243,6 @@ namespace Monkey
     public string TokenLiteral()
     {
       return token.Literal;
-    }
-
-    public void StatementNode()
-    {
-      throw new NotImplementedException();
     }
 
     public override string ToString()
@@ -322,11 +265,6 @@ namespace Monkey
     public string TokenLiteral()
     {
       return token.Literal;
-    }
-
-    public void ExpressionNode()
-    {
-      throw new NotImplementedException();
     }
 
     public override string ToString()
@@ -353,11 +291,6 @@ namespace Monkey
       return token.Literal;
     }
 
-    public void ExpressionNode()
-    {
-      throw new NotImplementedException();
-    }
-
     public override string ToString()
     {
       return Value;
@@ -368,11 +301,6 @@ namespace Monkey
   {
     public Token token { get; set; }
     public List<IExpression> Elements { get; set; }
-
-    public void ExpressionNode()
-    {
-      throw new NotImplementedException();
-    }
 
     public string TokenLiteral()
     {
@@ -391,11 +319,6 @@ namespace Monkey
     public IExpression Left { get; set; }
     public IExpression Index { get; set; }
 
-    public void ExpressionNode()
-    {
-      throw new NotImplementedException();
-    }
-
     public string TokenLiteral()
     {
       return token.Literal;
@@ -412,14 +335,9 @@ namespace Monkey
     public Token token { get; set; }
     public Dictionary<IExpression, IExpression> Pairs { get; set; }
 
-    public void ExpressionNode()
-    {
-      throw new NotImplementedException();
-    }
-
     public string TokenLiteral()
     {
-      throw new NotImplementedException();
+      return token.Literal;
     }
   }
 }
